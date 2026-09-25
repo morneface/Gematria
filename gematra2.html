@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gematria Calculator — Simple, English and Jewish/Hebrew gematria, 3x3 grid, Alpha Codes, BIP39 root vocabulary and corpus transformation.">
+    <title>Gematria Calculator</title>
+    <style>
+        /* ============ gematrix.org-inspired: plain, utilitarian, text-first ============ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            color: #000;
+            background: #fff;
+            padding: 10px;
+            line-height: 1.5;
+        }
+
+        .page { max-width: 800px; margin: 0 auto; }
+
+        a { color: #0000cc; text-decoration: underline; }
+        a:visited { color: #551a8b; }
+        a:hover { color: #cc0000; }
+
+        h1 {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 6px 0 12px;
+        }
+        h2 {
+            font-size: 15px;
+            margin: 20px 0 8px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 3px;
+        }
+        h3 { font-size: 13px; margin: 12px 0 6px; }
+
+        p { margin: 0 0 10px; }
+        .muted { color: #444; font-size: 12px; }
+        .hr { border: 0; border-top: 1px solid #000; margin: 14px 0; }
+        .sep { color: #000; margin: 0 6px; }
+
+        /* Help notice — lightbulb on yellow, plain bordered block */
+        .notice {
+            border: 1px solid #000;
+            background: #ffffcc;
+            padding: 8px 10px;
+            margin: 10px 0;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .notice::before { content: "💡"; margin-right: 6px; }
+        .notice .notice-titre {
+            display: block;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .notice p { margin: 0 0 6px; }
+        .notice p:last-child { margin-bottom: 0; }
+        .notice ul { margin: 0 0 0 16px; }
+        .notice li { margin-bottom: 4px; }
+        .notice li:last-child { margin-bottom: 0; }
+        .notice code {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 11px;
+            background: #fff;
+            border: 1px solid #999;
+            padding: 0 3px;
+        }
+
+        /* Search form, gematrix-style */
+        .searchbox {
+            border: 1px solid #000;
+            padding: 10px;
+            background: #f9f9f9;
+            margin-bottom: 12px;
+        }
+        .searchbox input[type="text"] {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            padding: 4px;
+            border: 1px solid #000;
+            width: 70%;
+            max-width: 420px;
+        }
+        .searchbox input[type="number"] {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 13px;
+            padding: 3px;
+            border: 1px solid #000;
+            width: 70px;
+        }
+        .searchbox button {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            padding: 4px 14px;
+            border: 2px outset #ccc;
+            background: #e8e8e8;
+            cursor: pointer;
+        }
+        .searchbox button:active { border-style: inset; }
+        .searchbox button:disabled { opacity: 0.6; cursor: wait; }
+
+        label { font-size: 12px; color: #333; }
+
+        /* Result lines — gematrix wording */
+        .resultats { margin: 0 0 12px; }
+        .resultats .ligne {
+            margin: 0 0 6px;
+            font-size: 13px;
+        }
+        .resultats .ligne b { font-size: 14px; }
+        .resultats .breakdown {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 11px;
+            color: #333;
+            margin: 2px 0 10px 18px;
+            word-break: break-all;
+        }
+
+        .pastille {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 0 4px;
+            border: 1px solid #000;
+            margin-left: 4px;
+        }
+        .pastille-3 { background: #ccffcc; }
+        .pastille-6 { background: #ffcc66; }
+        .pastille-9 { background: #ffcccc; }
+
+        /* Tables — plain bordered */
+        table {
+            border-collapse: collapse;
+            font-size: 11px;
+            width: 100%;
+            margin: 4px 0 10px;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 3px 5px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        th { background: #eee; font-weight: bold; }
+        tr:nth-child(even) td { background: #f5f5f5; }
+        tr.row-soft td { background: #e9f2e9; }
+
+        .grille { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 8px; }
+        .case-tableau { border: 1px solid #000; padding: 6px; }
+        .case-tableau h3 {
+            font-size: 11px;
+            text-align: left;
+            border-bottom: 1px solid #999;
+            padding-bottom: 2px;
+            margin-bottom: 4px;
+        }
+        .case-tableau .scroll-zone { max-height: 260px; overflow-y: auto; }
+
+        select { font-family: Arial, Helvetica, sans-serif; }
+        #bankStatus { display: inline-block; margin-top: 4px; }
+
+        textarea {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 12px;
+            width: 100%;
+            min-height: 100px;
+            border: 1px solid #000;
+            padding: 6px;
+            resize: vertical;
+        }
+
+        #corpusResultat {
+            border: 1px solid #000;
+            background: #f9f9f9;
+            padding: 10px;
+            max-height: 420px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            margin: 8px 0;
+        }
+        .mot-phrase .mot-origine { color: #b00; font-style: italic; }
+        .mot-phrase .mot-dots { color: #777; font-size: 11px; }
+        .mot-phrase .phrase-gen { color: #060; font-weight: bold; }
+        .somme-tag {
+            font-family: "Courier New", monospace;
+            font-size: 10px;
+            color: #0000cc;
+            vertical-align: super;
+            margin-right: 2px;
+        }
+
+        #corpusStats { font-size: 12px; color: #333; margin: 6px 0; }
+
+        .loading {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            border: 2px solid #ccc;
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .loading { animation: none; } }
+
+        #zoneShuffle { display: none; margin: 6px 0; }
+        #zoneShuffle.visible { display: block; }
+        #btnShuffle {
+            font-size: 11px;
+            padding: 2px 10px;
+            background: transparent;
+            color: #0000cc;
+            border: 1px dashed #0000cc;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        #btnShuffle:hover { color: #cc0000; border-color: #cc0000; }
+
+        .lien-disc { font-size: 11px; }
+
+        /* ---------- BIP39 Alpha section ---------- */
+        #bip39Stats { font-size: 12px; color: #333; margin: 6px 0; }
+        .badge-bip39 {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 0 4px;
+            border: 1px solid #000;
+            background: #e6e6ff;
+            margin-left: 4px;
+        }
+
+        /* ---------- Photo frame (gematrix-style) ---------- */
+        .cadre-photo {
+            float: right;
+            width: 180px;
+            margin: 0 0 10px 14px;
+            text-align: center;
+        }
+        .cadre-photo img {
+            display: block;
+            width: 180px;
+            height: 220px;
+            object-fit: cover;
+            border: 1px solid #000;
+            background: #f0f0f0;
+        }
+        .cadre-photo figcaption {
+            font-size: 11px;
+            color: #333;
+            border: 1px solid #999;
+            border-top: 0;
+            padding: 3px 4px;
+            background: #f9f9f9;
+        }
+        @media (max-width: 700px) {
+            .cadre-photo { float: none; margin: 0 auto 10px; }
+        }
+
+        .footer {
+            border-top: 1px solid #000;
+            margin-top: 18px;
+            padding-top: 8px;
+            font-size: 11px;
+            color: #333;
+        }
+        .ticker {
+            border: 1px dotted #999;
+            padding: 6px;
+            margin: 10px 0;
+            font-size: 11px;
+            color: #333;
+            word-break: break-word;
+        }
+        .ticker b { color: #000; }
+
+        @media (max-width: 700px) {
+            .grille { grid-template-columns: 1fr; }
+            .searchbox input[type="text"] { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <h1>Gematria Calculator</h1>
+
+    <!-- ==================== PHOTO FRAME ==================== -->
+    <figure class="cadre-photo">
+        <img src="https://imgs.search.brave.com/t-1sqLESs7_O3GHgnkKjzTsMsz6qs-maIPf6EtKcJvA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/Y3J5c3RhbGlua3Mu/Y29tL3NvcGhpYXRh/cmthbjEuanBn" alt="Sophia">
+        <figcaption>Goddess Sophia</figcaption>
+    </figure>
+
+    <div class="notice">
+        <span class="notice-titre">What this experimental site is for — in short</span>
+        <p>Gematria is the old habit of reading numbers hidden inside words: every letter is worth something, and the total is the « value » of the word. This site is a small laboratory built on that idea, and everything happens in this single page — it works offline.</p>
+        <ul>
+            <li><b>Calculate</b> a word or a number in three systems at once — Jewish/Hebrew, English (×6) and Simple (A=1 … Z=26) — with the letter-by-letter breakdown.</li>
+            <li><b>Explore ranges of numbers</b> as 3×3 tables, translated into words, digits and Alpha Code.</li>
+            <li><b>Sort the 2048 BIP39 words</b> into a numeric vocabulary of 9 roots, and spot the ones that keep landing on 3, 6 or 9.</li>
+            <li><b>Rewrite a whole text:</b> each word is swapped for a phrase carrying the exact same value, so the numbers survive while the story changes.</li>
+            <li><b>Reproduce anything:</b> each run mints a hash — paste it back to recover the very same result.</li>
+        </ul>
+        <p>It is a playground, not a reference tool. Nothing here is validated against any historical or religious source, and BIP39 is used strictly as a word bank: no seed phrase is ever generated, checked or exposed.</p>
+    </div>
+
+    <p class="muted">(Type in a word or a number e.g. God, Devil, 100, 666 — to calculate gematria values)</p>
+    <div class="searchbox">
+        <input type="text" id="motRecherche" placeholder="word or phrase...">
+        <button type="button" id="btnCalculer">Calculate</button>
+        <p class="muted" style="margin-top:6px;">Results shown in three systems: Jewish/Hebrew Gematria, English Gematria (×6) and Simple Gematria (A=1 … Z=26). BIP39 words are detected and decoded in Alpha Code with their root.</p>
+    </div>
+
+    <div class="resultats" id="resultatsCalcul"></div>
+
+    <hr class="hr">
+
+    <!-- ==================== 3x3 GRID ==================== -->
+    <h2>Number Tables — 3×3 Grid</h2>
+    <p class="muted">Range is split into 9 slices. Columns: number in words · number · Alpha Code (0→J, 1→A … 9→I) · digit sum · letter. Roots 3<span class="pastille pastille-3">3</span> 6<span class="pastille pastille-6">6</span> 9<span class="pastille pastille-9">9</span> are badged.</p>
+    <div class="searchbox">
+        <label for="debut">From:</label>
+        <input type="number" id="debut" value="1" min="0">
+        <label for="fin">To:</label>
+        <input type="number" id="fin" value="90" min="0">
+        <button type="button" id="btnGrille">Generate the 9 tables</button>
+    </div>
+
+    <div class="grille" id="grille"></div>
+
+    <hr class="hr">
+
+    <!-- ==================== BIP39 x ALPHA CODE ==================== -->
+    <h2>BIP39 × Alpha Code — Root Vocabulary</h2>
+    <p class="muted">Each BIP39 word is converted to its Simple Gematria value (A=1 … Z=26), then that number is encoded in Alpha Code (0→J, 1→A … 9→I). For every word we compute the <b>digit sum before reduction</b> (e.g. 48 → 4+8=12) and the <b>digital root after reduction</b> (12 → 1+2=3) — a numeric vocabulary of 9 roots. Roots 3<span class="pastille pastille-3">3</span> 6<span class="pastille pastille-6">6</span> 9<span class="pastille pastille-9">9</span> are badged.</p>
+    <div class="notice">
+        <span class="notice-titre">Word banks and offline use</span>
+        <p><b>BIP39 English</b> (2048 words) is embedded in this page. <b>French</b> and <b>Portuguese</b> are downloaded from the official Bitcoin BIPs repository on first use; without a network they silently fall back to a built-in bank of 400 English words. English is therefore the only bank guaranteed to be identical online and offline.</p>
+    </div>
+    <div class="searchbox">
+        <label for="bip39BankAlpha">Word bank:</label>
+        <select id="bip39BankAlpha" style="font-size:13px;padding:3px;border:1px solid #000;margin-right:10px;">
+            <option value="bip39-en" selected>BIP39 English (2048 words)</option>
+            <option value="bip39-fr">BIP39 French (2048 words)</option>
+            <option value="bip39-pt">BIP39 Portuguese (2048 words)</option>
+        </select>
+        <label for="filtreRacine">Show root:</label>
+        <select id="filtreRacine" style="font-size:13px;padding:3px;border:1px solid #000;margin-right:10px;">
+            <option value="0" selected>All roots (9 tables)</option>
+            <option value="1">Root 1</option>
+            <option value="2">Root 2</option>
+            <option value="3">Root 3</option>
+            <option value="4">Root 4</option>
+            <option value="5">Root 5</option>
+            <option value="6">Root 6</option>
+            <option value="7">Root 7</option>
+            <option value="8">Root 8</option>
+            <option value="9">Root 9</option>
+        </select>
+        <button type="button" id="btnBip39Alpha">Generate the root vocabulary</button>
+    </div>
+    <div id="bip39Stats" aria-live="polite"></div>
+    <div class="grille" id="bip39Groupes"></div>
+
+    <hr class="hr">
+
+    <!-- ==================== CORPUS ==================== -->
+    <h2>Corpus Transformation — Words ➜ Phrases</h2>
+    <p class="muted">Each word is converted to its SIMPLE gematria value (A=1 … Z=26), then replaced by a grammar-structured phrase with the exact same sum. Words become phrases — another story is written.</p>
+    <div class="searchbox">
+        <label for="banqueMots">Word bank:</label>
+        <select id="banqueMots" style="font-size:13px;padding:3px;border:1px solid #000;margin-right:10px;">
+            <option value="mixed" selected>Mixed — built-in + BIP39</option>
+            <option value="builtin">Built-in thematic banks</option>
+            <option value="bip39-en">BIP39 English (2048 words)</option>
+            <option value="bip39-fr">BIP39 French (2048 words)</option>
+            <option value="bip39-pt">BIP39 Portuguese (2048 words)</option>
+        </select>
+        <span id="bankStatus" class="muted">BIP39 banks load from the official Bitcoin BIPs repository when needed (English is embedded).</span>
+        <br><br>
+        <label for="sommeMin">Minimum sum per word:</label>
+        <input type="number" id="sommeMin" value="10" min="1">
+        <label for="maxPhrases">Variants per word:</label>
+        <input type="number" id="maxPhrases" value="1" min="1" max="5">
+        <br><br>
+        <label for="hashGen">Generation hash:</label>
+        <input type="text" id="hashGen" style="font-family:'Courier New',monospace;font-size:12px;padding:3px;border:1px solid #000;width:230px;" placeholder="auto-generated (e.g. GEM-SOPHIA-ROOT-CODE-BIP-K2X9F0)">
+        <button type="button" id="btnHash">Regenerate from hash</button>
+        <button type="button" id="btnNewHash">⟲ New hash</button>
+        <p class="muted" style="margin-top:4px;">Every transformation mints a unique hash. Paste it back and click « Regenerate from hash » to recover the exact same phrases — unimaginably many possible generations, one string to find them again.</p>
+    </div>
+    <div class="notice">
+        <span class="notice-titre">Offline behaviour — what still reproduces without a network</span>
+        <ul>
+            <li><b>The hash is 100% local.</b> The string is hashed (xmur3) into a seed that drives a seeded PRNG (mulberry32). No server, no Web Crypto, no network. The same hash always rebuilds the same phrases, order included.</li>
+            <li><b>Only the word bank needs the network.</b> <code>Built-in</code> and <code>BIP39 English</code> (2048 words) are embedded in this file: offline they behave exactly the same.</li>
+            <li><b>BIP39 French and BIP39 Portuguese are downloaded</b> from the official Bitcoin BIPs repository on first use. Offline the loader silently falls back to a built-in bank of 400 English words.</li>
+            <li><b>Consequence:</b> with an FR/PT bank, the very same hash will <i>not</i> give back the same phrases if you switch between online and offline — the word pool changed, not the hash. The status line next to the selector always names the bank actually in use.</li>
+            <li><b>For strict reproducibility</b> stay on <code>Built-in</code> or <code>BIP39 English</code>, or load the FR/PT bank once while online so the browser cache can serve it afterwards.</li>
+        </ul>
+    </div>
+    <textarea id="corpusInput" placeholder="Paste your corpus here... e.g. The old king walked toward the dark light of the forgotten temple.">The old king walked toward the dark light of the forgotten temple. Night fell upon the sleeping city, and the secret code awoke in silence.</textarea>
+    <div style="margin:8px 0;">
+        <button type="button" id="btnTransformer">Transform the Corpus <span class="loading" id="loadingCorpus" style="display: none;"></span></button>
+        <button type="button" id="btnReinit">Clear</button>
+    </div>
+    <div id="corpusStats" aria-live="polite"></div>
+    <div id="corpusResultat" aria-live="polite">The result will be displayed here...</div>
+    <div id="zoneShuffle">
+        <button type="button" id="btnShuffle" class="lien-disc">⟲ Shuffle the result</button>
+    </div>
+    <div style="margin: 8px 0;">
+        <button type="button" id="btnCopier">Copy the result</button>
+    </div>
+
+    <!-- ==================== TICKER ==================== -->
+    <div class="ticker" id="ticker"><b>Latest words calculated for Gematria:</b> </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <div class="footer">
+        <p>
+            <a href="#motRecherche">About the Calculator</a><span class="sep">|</span>
+            <a href="#grille">Number Tables</a><span class="sep">|</span>
+            <a href="#bip39Groupes">BIP39 Root Vocabulary</a><span class="sep">|</span>
+            <a href="#corpusInput">Corpus Decoder</a><span class="sep">|</span>
+            <a href="#ticker">Latest Words</a>
+        </p>
+        <p class="muted">Simple Gematria (A=1 … Z=26) <span class="sep">|</span> English Gematria (A=6 … Z=156) <span class="sep">|</span> Jewish/Hebrew Gematria <span class="sep">|</span> Alpha Codes (0→J, 1→A … 9→I) <span class="sep">|</span> BIP39 root vocabulary <span class="sep">|</span> For fun and exploration.</p>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ================================================================
+       Gematria constants
+       ================================================================ */
+
+    /** Alpha Code key: 0→J, 1→A … 9→I */
+    const LETTRES_CODE = ['J', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+
+    const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    /** Simple gematria: A=1 … Z=26 */
+    const SIMPLE = Object.fromEntries([...ALPHABET].map((l, i) => [l, i + 1]));
+
+    /** English gematria: A=6 … Z=156 (6× ordinal) */
+    const ANGLAISE = Object.fromEntries([...ALPHABET].map((l, i) => [l, (i + 1) * 6]));
+
+    /** Jewish / Hebrew gematria letter values (as used by classic English decoders) */
+    const JUIVE = {
+        A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8, I: 9, J: 10,
+        K: 20, L: 20, M: 30, N: 40, O: 50, P: 70, Q: 80, R: 80, S: 90,
+        T: 100, U: 200, V: 200, W: 200, X: 300, Y: 300, Z: 300
+    };
+
+    /** Accented French characters fold to their base letter */
+    const ACCENTS = {
+        'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A', 'Æ': 'A',
+        'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E',
+        'Ì': 'I', 'Í': 'I', 'Î': 'I', 'Ï': 'I',
+        'Ò': 'O', 'Ó': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O', 'Œ': 'O',
+        'Ù': 'U', 'Ú': 'U', 'Û': 'U', 'Ü': 'U',
+        'Ý': 'Y', 'Ÿ': 'Y', 'Ç': 'C', 'Ñ': 'N'
+    };
+
+    /* ================================================================
+       Word pools — sorted by grammatical nature
+       ================================================================ */
+
+    const CATEGORIES_BRUTES = {
+        pronom: ["I", "me", "my", "we", "us", "our"],
+        verbe: [
+            "see", "find", "hear", "call", "dream", "pray", "guide", "love",
+            "seek", "know", "make", "send", "sing", "leap", "hold", "guard",
+            "walk", "wake", "read", "keep", "name", "tame", "draw", "mark"
+        ],
+        liaison: ["the", "a", "of", "in", "to", "and", "with", "by", "for", "at"],
+        nom: [
+            "light", "dark", "fire", "soul", "mind", "heart", "code", "truth",
+            "secret", "spirit", "birth", "peace", "war", "faith", "hope",
+            "word", "king", "head", "days", "sign"
+        ],
+        nomMystique: [
+            "dragon", "phoenix", "unicorn", "griffin", "sphinx", "minotaur",
+            "chimera", "kraken", "basilisk", "hippogriff"
+        ],
+        divinite: [
+            "God", "Sophia", "Osiris", "Isis", "Ra", "Zeus", "Athena", "Apollo",
+            "Odin", "Thor", "Loki", "Freya", "Anubis", "Horus", "Eris"
+        ],
+        lieu: [
+            "Heaven", "Hell", "Babylon", "Atlantis", "Valhalla", "Olympus",
+            "Eden", "Nirvana", "Shambhala", "Avalon", "Camelot", "Asgard"
+        ],
+        prenom: ["Mark", "John", "Luke", "Anna", "Eva", "Liam", "Noah", "Emma", "Luna"]
+    };
+
+    const CATEGORIES = Object.fromEntries(
+        Object.entries(CATEGORIES_BRUTES).map(([cat, mots]) => [
+            cat,
+            [...new Set(mots)].map(mot => ({ mot: mot.toUpperCase(), val: calculerValeurGematria(mot) }))
+        ])
+    );
+
+    /* Full official BIP39 English wordlist (2048 words), embedded so the
+       tool works fully offline. BIP39 is used here strictly as a lexical
+       word bank; this tool does NOT generate, validate or expose seed phrases. */
+    const BIP39_EN_EMB = 'abandon,ability,able,about,above,absent,absorb,abstract,absurd,abuse,access,accident,account,accuse,achieve,acid,acoustic,acquire,across,act,action,actor,actress,actual,adapt,add,addict,address,adjust,admit,adult,advance,advice,aerobic,affair,afford,afraid,again,age,agent,agree,ahead,aim,air,airport,aisle,alarm,album,alcohol,alert,alien,all,alley,allow,almost,alone,alpha,already,also,alter,always,amateur,amazing,among,amount,amused,analyst,anchor,ancient,anger,angle,angry,animal,ankle,announce,annual,another,answer,antenna,antique,anxiety,any,apart,apology,appear,apple,approve,april,arch,arctic,area,arena,argue,arm,armed,armor,army,around,arrange,arrest,arrive,arrow,art,artefact,artist,artwork,ask,aspect,assault,asset,assist,assume,asthma,athlete,atom,attack,attend,attitude,attract,auction,audit,august,aunt,author,auto,autumn,average,avocado,avoid,awake,aware,away,awesome,awful,awkward,axis,baby,bachelor,bacon,badge,bag,balance,balcony,ball,bamboo,banana,banner,bar,barely,bargain,barrel,base,basic,basket,battle,beach,bean,beauty,because,become,beef,before,begin,behave,behind,believe,below,belt,bench,benefit,best,betray,better,between,beyond,bicycle,bid,bike,bind,biology,bird,birth,bitter,black,blade,blame,blanket,blast,bleak,bless,blind,blood,blossom,blouse,blue,blur,blush,board,boat,body,boil,bomb,bone,bonus,book,boost,border,boring,borrow,boss,bottom,bounce,box,boy,bracket,brain,brand,brass,brave,bread,breeze,brick,bridge,brief,bright,bring,brisk,broccoli,broken,bronze,broom,brother,brown,brush,bubble,buddy,budget,buffalo,build,bulb,bulk,bullet,bundle,bunker,burden,burger,burst,bus,business,busy,butter,buyer,buzz,cabbage,cabin,cable,cactus,cage,cake,call,calm,camera,camp,can,canal,cancel,candy,cannon,canoe,canvas,canyon,capable,capital,captain,car,carbon,card,cargo,carpet,carry,cart,case,cash,casino,castle,casual,cat,catalog,catch,category,cattle,caught,cause,caution,cave,ceiling,celery,cement,census,century,cereal,certain,chair,chalk,champion,change,chaos,chapter,charge,chase,chat,cheap,check,cheese,chef,cherry,chest,chicken,chief,child,chimney,choice,choose,chronic,chuckle,chunk,churn,cigar,cinnamon,circle,citizen,city,civil,claim,clap,clarify,claw,clay,clean,clerk,clever,click,client,cliff,climb,clinic,clip,clock,clog,close,cloth,cloud,clown,club,clump,cluster,clutch,coach,coast,coconut,code,coffee,coil,coin,collect,color,column,combine,come,comfort,comic,common,company,concert,conduct,confirm,congress,connect,consider,control,convince,cook,cool,copper,copy,coral,core,corn,correct,cost,cotton,couch,country,couple,course,cousin,cover,coyote,crack,cradle,craft,cram,crane,crash,crater,crawl,crazy,cream,credit,creek,crew,cricket,crime,crisp,critic,crop,cross,crouch,crowd,crucial,cruel,cruise,crumble,crunch,crush,cry,crystal,cube,culture,cup,cupboard,curious,current,curtain,curve,cushion,custom,cute,cycle,dad,damage,damp,dance,danger,daring,dash,daughter,dawn,day,deal,debate,debris,decade,december,decide,decline,decorate,decrease,deer,defense,define,defy,degree,delay,deliver,demand,demise,denial,dentist,deny,depart,depend,deposit,depth,deputy,derive,describe,desert,design,desk,despair,destroy,detail,detect,develop,device,devote,diagram,dial,diamond,diary,dice,diesel,diet,differ,digital,dignity,dilemma,dinner,dinosaur,direct,dirt,disagree,discover,disease,dish,dismiss,disorder,display,distance,divert,divide,divorce,dizzy,doctor,document,dog,doll,dolphin,domain,donate,donkey,donor,door,dose,double,dove,draft,dragon,drama,drastic,draw,dream,dress,drift,drill,drink,drip,drive,drop,drum,dry,duck,dumb,dune,during,dust,dutch,duty,dwarf,dynamic,eager,eagle,early,earn,earth,easily,east,easy,echo,ecology,economy,edge,edit,educate,effort,egg,eight,either,elbow,elder,electric,elegant,element,elephant,elevator,elite,else,embark,embody,embrace,emerge,emotion,employ,empower,empty,enable,enact,end,endless,endorse,enemy,energy,enforce,engage,engine,enhance,enjoy,enlist,enough,enrich,enroll,ensure,enter,entire,entry,envelope,episode,equal,equip,era,erase,erode,erosion,error,erupt,escape,essay,essence,estate,eternal,ethics,evidence,evil,evoke,evolve,exact,example,excess,exchange,excite,exclude,excuse,execute,exercise,exhaust,exhibit,exile,exist,exit,exotic,expand,expect,expire,explain,expose,express,extend,extra,eye,eyebrow,fabric,face,faculty,fade,faint,faith,fall,false,fame,family,famous,fan,fancy,fantasy,farm,fashion,fat,fatal,father,fatigue,fault,favorite,feature,february,federal,fee,feed,feel,female,fence,festival,fetch,fever,few,fiber,fiction,field,figure,file,film,filter,final,find,fine,finger,finish,fire,firm,first,fiscal,fish,fit,fitness,fix,flag,flame,flash,flat,flavor,flee,flight,flip,float,flock,floor,flower,fluid,flush,fly,foam,focus,fog,foil,fold,follow,food,foot,force,forest,forget,fork,fortune,forum,forward,fossil,foster,found,fox,fragile,frame,frequent,fresh,friend,fringe,frog,front,frost,frown,frozen,fruit,fuel,fun,funny,furnace,fury,future,gadget,gain,galaxy,gallery,game,gap,garage,garbage,garden,garlic,garment,gas,gasp,gate,gather,gauge,gaze,general,genius,genre,gentle,genuine,gesture,ghost,giant,gift,giggle,ginger,giraffe,girl,give,glad,glance,glare,glass,glide,glimpse,globe,gloom,glory,glove,glow,glue,goat,goddess,gold,good,goose,gorilla,gospel,gossip,govern,gown,grab,grace,grain,grant,grape,grass,gravity,great,green,grid,grief,grit,grocery,group,grow,grunt,guard,guess,guide,guilt,guitar,gun,gym,habit,hair,half,hammer,hamster,hand,happy,harbor,hard,harsh,harvest,hat,have,hawk,hazard,head,health,heart,heavy,hedgehog,height,hello,helmet,help,hen,hero,hidden,high,hill,hint,hip,hire,history,hobby,hockey,hold,hole,holiday,hollow,home,honey,hood,hope,horn,horror,horse,hospital,host,hotel,hour,hover,hub,huge,human,humble,humor,hundred,hungry,hunt,hurdle,hurry,hurt,husband,hybrid,ice,icon,idea,identify,idle,ignore,ill,illegal,illness,image,imitate,immense,immune,impact,impose,improve,impulse,inch,include,income,increase,index,indicate,indoor,industry,infant,inflict,inform,inhale,inherit,initial,inject,injury,inmate,inner,innocent,input,inquiry,insane,insect,inside,inspire,install,intact,interest,into,invest,invite,involve,iron,island,isolate,issue,item,ivory,jacket,jaguar,jar,jazz,jealous,jeans,jelly,jewel,job,join,joke,journey,joy,judge,juice,jump,jungle,junior,junk,just,kangaroo,keen,keep,ketchup,key,kick,kid,kidney,kind,kingdom,kiss,kit,kitchen,kite,kitten,kiwi,knee,knife,knock,know,lab,label,labor,ladder,lady,lake,lamp,language,laptop,large,later,latin,laugh,laundry,lava,law,lawn,lawsuit,layer,lazy,leader,leaf,learn,leave,lecture,left,leg,legal,legend,leisure,lemon,lend,length,lens,leopard,lesson,letter,level,liar,liberty,library,license,life,lift,light,like,limb,limit,link,lion,liquid,list,little,live,lizard,load,loan,lobster,local,lock,logic,lonely,long,loop,lottery,loud,lounge,love,loyal,lucky,luggage,lumber,lunar,lunch,luxury,lyrics,machine,mad,magic,magnet,maid,mail,main,major,make,mammal,man,manage,mandate,mango,mansion,manual,maple,marble,march,margin,marine,market,marriage,mask,mass,master,match,material,math,matrix,matter,maximum,maze,meadow,mean,measure,meat,mechanic,medal,media,melody,melt,member,memory,mention,menu,mercy,merge,merit,merry,mesh,message,metal,method,middle,midnight,milk,million,mimic,mind,minimum,minor,minute,miracle,mirror,misery,miss,mistake,mix,mixed,mixture,mobile,model,modify,mom,moment,monitor,monkey,monster,month,moon,moral,more,morning,mosquito,mother,motion,motor,mountain,mouse,move,movie,much,muffin,mule,multiply,muscle,museum,mushroom,music,must,mutual,myself,mystery,myth,naive,name,napkin,narrow,nasty,nation,nature,near,neck,need,negative,neglect,neither,nephew,nerve,nest,net,network,neutral,never,news,next,nice,night,noble,noise,nominee,noodle,normal,north,nose,notable,note,nothing,notice,novel,now,nuclear,number,nurse,nut,oak,obey,object,oblige,obscure,observe,obtain,obvious,occur,ocean,october,odor,off,offer,office,often,oil,okay,old,olive,olympic,omit,once,one,onion,online,only,open,opera,opinion,oppose,option,orange,orbit,orchard,order,ordinary,organ,orient,original,orphan,ostrich,other,outdoor,outer,output,outside,oval,oven,over,own,owner,oxygen,oyster,ozone,pact,paddle,page,pair,palace,palm,panda,panel,panic,panther,paper,parade,parent,park,parrot,party,pass,patch,path,patient,patrol,pattern,pause,pave,payment,peace,peanut,pear,peasant,pelican,pen,penalty,pencil,people,pepper,perfect,permit,person,pet,phone,photo,phrase,physical,piano,picnic,picture,piece,pig,pigeon,pill,pilot,pink,pioneer,pipe,pistol,pitch,pizza,place,planet,plastic,plate,play,please,pledge,pluck,plug,plunge,poem,poet,point,polar,pole,police,pond,pony,pool,popular,portion,position,possible,post,potato,pottery,poverty,powder,power,practice,praise,predict,prefer,prepare,present,pretty,prevent,price,pride,primary,print,priority,prison,private,prize,problem,process,produce,profit,program,project,promote,proof,property,prosper,protect,proud,provide,public,pudding,pull,pulp,pulse,pumpkin,punch,pupil,puppy,purchase,purity,purpose,purse,push,put,puzzle,pyramid,quality,quantum,quarter,question,quick,quit,quiz,quote,rabbit,raccoon,race,rack,radar,radio,rail,rain,raise,rally,ramp,ranch,random,range,rapid,rare,rate,rather,raven,raw,razor,ready,real,reason,rebel,rebuild,recall,receive,recipe,record,recycle,reduce,reflect,reform,refuse,region,regret,regular,reject,relax,release,relief,rely,remain,remember,remind,remove,render,renew,rent,reopen,repair,repeat,replace,report,require,rescue,resemble,resist,resource,response,result,retire,retreat,return,reunion,reveal,review,reward,rhythm,rib,ribbon,rice,rich,ride,ridge,rifle,right,rigid,ring,riot,ripple,risk,ritual,rival,river,road,roast,robot,robust,rocket,romance,roof,rookie,room,rose,rotate,rough,round,route,royal,rubber,rude,rug,rule,run,runway,rural,sad,saddle,sadness,safe,sail,salad,salmon,salon,salt,salute,same,sample,sand,satisfy,satoshi,sauce,sausage,save,say,scale,scan,scare,scatter,scene,scheme,school,science,scissors,scorpion,scout,scrap,screen,script,scrub,sea,search,season,seat,second,secret,section,security,seed,seek,segment,select,sell,seminar,senior,sense,sentence,series,service,session,settle,setup,seven,shadow,shaft,shallow,share,shed,shell,sheriff,shield,shift,shine,ship,shiver,shock,shoe,shoot,shop,short,shoulder,shove,shrimp,shrug,shuffle,shy,sibling,sick,side,siege,sight,sign,silent,silk,silly,silver,similar,simple,since,sing,siren,sister,situate,six,size,skate,sketch,ski,skill,skin,skirt,skull,slab,slam,sleep,slender,slice,slide,slight,slim,slogan,slot,slow,slush,small,smart,smile,smoke,smooth,snack,snake,snap,sniff,snow,soap,soccer,social,sock,soda,soft,solar,soldier,solid,solution,solve,someone,song,soon,sorry,sort,soul,sound,soup,source,south,space,spare,spatial,spawn,speak,special,speed,spell,spend,sphere,spice,spider,spike,spin,spirit,split,spoil,sponsor,spoon,sport,spot,spray,spread,spring,spy,square,squeeze,squirrel,stable,stadium,staff,stage,stairs,stamp,stand,start,state,stay,steak,steel,stem,step,stereo,stick,still,sting,stock,stomach,stone,stool,story,stove,strategy,street,strike,strong,struggle,student,stuff,stumble,style,subject,submit,subway,success,such,sudden,suffer,sugar,suggest,suit,summer,sun,sunny,sunset,super,supply,supreme,sure,surface,surge,surprise,surround,survey,suspect,sustain,swallow,swamp,swap,swarm,swear,sweet,swift,swim,swing,switch,sword,symbol,symptom,syrup,system,table,tackle,tag,tail,talent,talk,tank,tape,target,task,taste,tattoo,taxi,teach,team,tell,ten,tenant,tennis,tent,term,test,text,thank,that,theme,then,theory,there,they,thing,this,thought,three,thrive,throw,thumb,thunder,ticket,tide,tiger,tilt,timber,time,tiny,tip,tired,tissue,title,toast,tobacco,today,toddler,toe,together,toilet,token,tomato,tomorrow,tone,tongue,tonight,tool,tooth,top,topic,topple,torch,tornado,tortoise,toss,total,tourist,toward,tower,town,toy,track,trade,traffic,tragic,train,transfer,trap,trash,travel,tray,treat,tree,trend,trial,tribe,trick,trigger,trim,trip,trophy,trouble,truck,true,truly,trumpet,trust,truth,try,tube,tuition,tumble,tuna,tunnel,turkey,turn,turtle,twelve,twenty,twice,twin,twist,two,type,typical,ugly,umbrella,unable,unaware,uncle,uncover,under,undo,unfair,unfold,unhappy,uniform,unique,unit,universe,unknown,unlock,until,unusual,unveil,update,upgrade,uphold,upon,upper,upset,urban,urge,usage,use,used,useful,useless,usual,utility,vacant,vacuum,vague,valid,valley,valve,van,vanish,vapor,various,vast,vault,vehicle,velvet,vendor,venture,venue,verb,verify,version,very,vessel,veteran,viable,vibrant,vicious,victory,video,view,village,vintage,violin,virtual,virus,visa,visit,visual,vital,vivid,vocal,voice,void,volcano,volume,vote,voyage,wage,wagon,wait,walk,wall,walnut,want,warfare,warm,warrior,wash,wasp,waste,water,wave,way,wealth,weapon,wear,weasel,weather,web,wedding,weekend,weird,welcome,west,wet,whale,what,wheat,wheel,when,where,whip,whisper,wide,width,wife,wild,will,win,window,wine,wing,wink,winner,winter,wire,wisdom,wise,wish,witness,wolf,woman,wonder,wood,wool,word,work,world,worry,worth,wrap,wreck,wrestle,wrist,write,wrong,yard,year,yellow,you,young,youth,zebra,zero,zone,zoo'.split(',');
+    const BIP39_EN_SET = new Set(BIP39_EN_EMB);
+
+    /* External mnemonic banks. BIP39 is used here strictly as a lexical
+       word bank; this tool does NOT generate, validate or expose seed phrases. */
+    const BIP39_URLS = {
+        'bip39-fr': 'https://raw.githubusercontent.com/bitcoin/bips/master/bip-0039/french.txt',
+        'bip39-pt': 'https://raw.githubusercontent.com/bitcoin/bips/master/bip-0039/portuguese.txt'
+    };
+    const BIP39_BANKS = new Map();
+    const BIP39_FALLBACK = BIP39_EN_EMB.slice(0, 400);
+
+    function wordsToCategory(words) {
+        return [...new Set(words.map(w => w.trim()).filter(Boolean))]
+            .map(mot => ({ mot: mot.toUpperCase(), val: calculerValeurGematria(mot) }))
+            .filter(w => w.val > 0);
+    }
+
+    function setBankStatus(message) {
+        const el = document.getElementById('bankStatus');
+        if (el) el.textContent = message;
+    }
+
+    async function chargerBanqueBIP39(id) {
+        if (BIP39_BANKS.has(id)) return BIP39_BANKS.get(id);
+        if (id === 'bip39-en' || id === 'mixed') {
+            const bank = wordsToCategory(BIP39_EN_EMB);
+            BIP39_BANKS.set('bip39-en', bank);
+            if (id === 'mixed') return bank;
+            setBankStatus('BIP39 EN loaded: ' + bank.length + ' words (embedded).');
+            return bank;
+        }
+        const fallback = wordsToCategory(BIP39_FALLBACK);
+        try {
+            setBankStatus('Loading ' + id.toUpperCase() + '…');
+            const response = await fetch(BIP39_URLS[id], { cache: 'force-cache' });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            const text = await response.text();
+            const words = text.split(/\r?\n/).map(w => w.trim()).filter(Boolean);
+            if (words.length < 2000) throw new Error('Unexpected wordlist size');
+            const bank = wordsToCategory(words);
+            BIP39_BANKS.set(id, bank);
+            setBankStatus(id.toUpperCase() + ' loaded: ' + bank.length + ' words.');
+            return bank;
+        } catch (error) {
+            BIP39_BANKS.set(id, fallback);
+            setBankStatus(id.toUpperCase() + ' unavailable offline — using built-in fallback bank (' + fallback.length + ' words).');
+            return fallback;
+        }
+    }
+
+    const REMPLISSANTS_BASE = [
+        ...CATEGORIES.liaison,
+        ...CATEGORIES.nom.filter(w => w.val <= 40)
+    ].filter(w => w.val > 0);
+
+    function getGenerationPools(bankId, bip39Bank) {
+        const bank = bankId === 'builtin' ? [] : (bip39Bank || []);
+        const external = bank.slice();
+        const mixedNouns = [...CATEGORIES.nom, ...CATEGORIES.nomMystique, ...external];
+        const mixedFillers = [...REMPLISSANTS_BASE, ...external.filter(w => w.val <= 40)];
+        return {
+            nomEtBip39: mixedNouns,
+            remplissants: mixedFillers.filter(w => w.val > 0),
+            bip39: external
+        };
+    }
+
+    function templatesPourBanque(bankId) {
+        const base = [
+            ['pronom', 'verbe', 'liaison', 'nom'],
+            ['pronom', 'verbe', 'liaison', 'nomMystique'],
+            ['pronom', 'verbe', 'liaison', 'lieu'],
+            ['pronom', 'verbe', 'liaison', 'divinite'],
+            ['pronom', 'verbe', 'liaison', 'nom', 'liaison', 'lieu'],
+            ['pronom', 'verbe', 'liaison', 'nomMystique', 'liaison', 'lieu'],
+            ['prenom', 'verbe', 'liaison', 'nom'],
+            ['divinite', 'verbe', 'liaison', 'nom'],
+            ['divinite', 'verbe', 'liaison', 'nomMystique'],
+            ['prenom', 'verbe', 'liaison', 'lieu']
+        ];
+        if (bankId !== 'builtin') {
+            base.push(
+                ['pronom', 'verbe', 'liaison', 'bip39'],
+                ['divinite', 'verbe', 'liaison', 'bip39'],
+                ['prenom', 'verbe', 'liaison', 'bip39'],
+                ['pronom', 'verbe', 'liaison', 'bip39', 'liaison', 'lieu']
+            );
+        }
+        return base;
+    }
+
+    /* ================================================================
+       Utilities
+       ================================================================ */
+
+    /** Simple gematria: A=1 … Z=26, accented letters folded, unknown chars = 0. */
+    function calculerValeurGematria(mot) {
+        return [...mot.toUpperCase()].reduce((acc, lettre) => {
+            const base = ACCENTS[lettre] || lettre;
+            return acc + (SIMPLE[base] ?? 0);
+        }, 0);
+    }
+
+    /** Full value of a phrase in a given cipher table. */
+    const valeurAvec = (mot, table) =>
+        [...mot.toUpperCase()].reduce((acc, l) => {
+            const base = ACCENTS[l] || l;
+            return acc + (table[base] ?? 0);
+        }, 0);
+
+    /** Letter-by-letter breakdown string, gematrix-style: "g7 e5 m13 ..." */
+    const breakdown = (mot, table) =>
+        [...mot.toUpperCase()].filter(l => (ACCENTS[l] || l) in table)
+            .map(l => (ACCENTS[l] || l).toLowerCase() + table[ACCENTS[l] || l]).join(' ');
+
+    /** Number spelled out in FRENCH words (e.g. 23 -> "VINGT-TROIS"). */
+    function nombreEnLettres(num) {
+        if (num === 0) return "ZÉRO";
+        if (num > 999999) return String(num);
+
+        const UNITES = ["", "UN", "DEUX", "TROIS", "QUATRE", "CINQ", "SIX", "SEPT", "HUIT", "NEUF"];
+        const DIZAINES = ["", "DIX", "VINGT", "TRENTE", "QUARANTE", "CINQUANTE", "SOIXANTE",
+            "SOIXANTE-DIX", "QUATRE-VINGT", "QUATRE-VINGT-DIX"];
+        const PARTICULIERS = {
+            11: "ONZE", 12: "DOUZE", 13: "TREIZE", 14: "QUATORZE", 15: "QUINZE", 16: "SEIZE",
+            71: "SOIXANTE-ET-ONZE", 72: "SOIXANTE-DOUZE", 73: "SOIXANTE-TREIZE", 74: "SOIXANTE-QUATORZE",
+            75: "SOIXANTE-QUINZE", 76: "SOIXANTE-SEIZE", 91: "QUATRE-VINGT-ONZE", 92: "QUATRE-VINGT-DOUZE",
+            93: "QUATRE-VINGT-TREIZE", 94: "QUATRE-VINGT-QUATORZE", 95: "QUATRE-VINGT-QUINZE", 96: "QUATRE-VINGT-SEIZE"
+        };
+
+        let resultat = "";
+        if (num >= 100) {
+            const c = Math.floor(num / 100);
+            resultat += UNITES[c] + (num % 100 === 0 ? " CENTS" : " CENT");
+            num %= 100;
+        }
+        if (num > 0) {
+            if (PARTICULIERS[num]) {
+                resultat += (resultat ? " " : "") + PARTICULIERS[num];
+            } else {
+                const d = Math.floor(num / 10);
+                const u = num % 10;
+                if (d > 0) {
+                    resultat += (resultat ? " " : "") + DIZAINES[d];
+                    if (u > 0) {
+                        if (u === 1 && d >= 2 && d <= 6) {
+                            resultat += "-ET-UN";
+                        } else if (d === 7 || d === 9) {
+                            resultat += "-" + PARTICULIERS[10 + u];
+                        } else {
+                            resultat += "-" + UNITES[u];
+                        }
+                    }
+                } else {
+                    resultat += (resultat ? " " : "") + UNITES[u];
+                }
+            }
+        }
+        return resultat.replace(/-+/g, "-").trim();
+    }
+
+    /** English number spelling for an extra numeric reading. */
+    function nombreEnLettresAnglais(num) {
+        if (num === 0) return 'ZERO';
+        if (num > 999999) return String(num);
+        const ones = ['', 'ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE','TEN','ELEVEN','TWELVE','THIRTEEN','FOURTEEN','FIFTEEN','SIXTEEN','SEVENTEEN','EIGHTEEN','NINETEEN'];
+        const tens = ['', '', 'TWENTY','THIRTY','FORTY','FIFTY','SIXTY','SEVENTY','EIGHTY','NINETY'];
+        const under100 = n => n < 20 ? ones[n] : tens[Math.floor(n/10)] + (n%10 ? '-' + ones[n%10] : '');
+        let out = '';
+        if (num >= 1000) {
+            out += under100(Math.floor(num / 1000)) + ' THOUSAND';
+            num %= 1000;
+            if (num) out += ' ';
+        }
+        if (num >= 100) {
+            out += ones[Math.floor(num / 100)] + ' HUNDRED';
+            num %= 100;
+            if (num) out += ' ';
+        }
+        if (num) out += under100(num);
+        return out;
+    }
+
+    const produitChiffres = (num) => String(num).split('').map(Number).reduce((a,n) => a*n, 1);
+
+    /** Alpha Code: each digit becomes a letter (0→J, 1→A … 9→I). */
+    const genererCodeAlpha = (num) =>
+        String(num).split('').map(c => LETTRES_CODE[+c]).join('');
+
+    /** Digit sum, e.g. 236 → { somme: 11, expression: "2+3+6" } */
+    const calculerSommeChiffres = (num) => {
+        const chiffres = String(num).split('').map(Number);
+        return {
+            somme: chiffres.reduce((acc, n) => acc + n, 0),
+            expression: chiffres.join('+')
+        };
+    };
+
+    /** Digital root: reduce a number to a single digit, e.g. 236 → 2. */
+    const racineNumerique = (n) => {
+        while (n > 9) {
+            n = String(n).split('').reduce((acc, c) => acc + +c, 0);
+        }
+        return n;
+    };
+
+    /** Map a digit sum back to its letter (1=A … 26=Z). */
+    const sommeEnLettre = (somme) =>
+        (somme >= 1 && somme <= 26) ? ALPHABET[somme - 1] : "?";
+
+    /** Escape a string before injecting it into innerHTML. */
+    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+
+    const alea = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    /* ================================================================
+       Seeded PRNG — any string hash → a fully reproducible random
+       sequence. Same hash ⇒ same words, same phrases, same order.
+       ================================================================ */
+
+    /** xmur3 string hasher → 32-bit seed */
+    function hacherSeed(str) {
+        let h = 1779033703 ^ str.length;
+        for (let i = 0; i < str.length; i++) {
+            h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+            h = (h << 13) | (h >>> 19);
+        }
+        h ^= h >>> 16;
+        return h >>> 0;
+    }
+
+    /** mulberry32 PRNG seeded by a string */
+    function creerPRNG(seedStr) {
+        let a = hacherSeed(seedStr);
+        return function () {
+            a |= 0; a = (a + 0x6D2B79F5) | 0;
+            let t = Math.imul(a ^ (a >>> 15), 1 | a);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    /** Unique generation hash, e.g. GEM-SOPHIA-ROOT-CODE-BIP-K2X9F0 */
+    function genererHash() {
+        const atomes = ['ALPHA','BIP','CODE','DARK','DAWN','ECHO','GEM','KEY','LUNA','MYTH',
+                        'ORACLE','PHOENIX','RA','ROOT','SEED','SIGN','SOPHIA','SUN','TEMPLE','WORD'];
+        let s = 'GEM-';
+        for (let i = 0; i < 4; i++) s += atomes[Math.floor(Math.random() * atomes.length)] + '-';
+        s += Date.now().toString(36).toUpperCase() + '-' +
+             Math.floor(Math.random() * 1679616).toString(36).toUpperCase().padStart(4, '0');
+        return s;
+    }
+
+    const aleaSeeded = (rng, arr) => arr[Math.floor(rng() * arr.length)];
+
+    /* ================================================================
+       Calculator — gematrix-style three-system results
+       ================================================================ */
+
+    const SYSTEMES = [
+        { nom: 'Jewish/Hebrew Gematria', table: JUIVE },
+        { nom: 'English Gematria', table: ANGLAISE },
+        { nom: 'Simple Gematria', table: SIMPLE }
+    ];
+
+    /** In-memory ticker of latest calculated words (gematrix-style). */
+    const DERNIERS_MOTS = [];
+
+    function ajouterAuTicker(mot) {
+        const propre = mot.trim().toLowerCase();
+        if (!propre || DERNIERS_MOTS.includes(propre)) return;
+        DERNIERS_MOTS.unshift(propre);
+        if (DERNIERS_MOTS.length > 12) DERNIERS_MOTS.pop();
+        document.getElementById('ticker').innerHTML =
+            '<b>Latest words calculated for Gematria:</b> '
+            + DERNIERS_MOTS.map(escapeHtml).join(' | ');
+    }
+
+    function calculerMot() {
+        const saisie = document.getElementById('motRecherche').value.trim();
+        const div = document.getElementById('resultatsCalcul');
+
+        if (!saisie) {
+            div.innerHTML = '<p class="muted">Please type a word or a number.</p>';
+            return;
+        }
+
+        // Numeric search: show the Alpha Code and the digit-root info instead
+        if (/^\d+$/.test(saisie)) {
+            const n = parseInt(saisie, 10);
+            const { somme, expression } = calculerSommeChiffres(n);
+            const racine = racineNumerique(somme);
+            const pastille = [3, 6, 9].includes(racine)
+                ? `<span class="pastille pastille-${racine}">${racine}</span>` : '';
+            const anglais = nombreEnLettresAnglais(n);
+            const anglaisSimple = calculerValeurGematria(anglais);
+            const produit = produitChiffres(n);
+            div.innerHTML = `
+                <p class="ligne"><b>${n}</b> in Alpha Code equals <b>${genererCodeAlpha(n)}</b></p>
+                <p class="ligne">English word variant: <b>${escapeHtml(anglais)}</b> → Simple Gematria <b>${anglaisSimple}</b></p>
+                <p class="ligne">Digit sum: <b>${expression}=${somme}</b> → letter <b>${sommeEnLettre(somme)}</b></p>
+                <p class="ligne">Digit product: <b>${escapeHtml(String(produit))}</b></p>
+                <p class="ligne">Digital root: <b>${racine}</b>${pastille}</p>
+                <p class="ligne">In words (FR): <b>${escapeHtml(nombreEnLettres(n))}</b></p>`;
+            return;
+        }
+
+        // Word / phrase: three systems, gematrix-style lines + breakdown
+        let html = `<p class="ligne"><b>${escapeHtml(saisie)}</b> value in Gematria:</p>`;
+        for (const sys of SYSTEMES) {
+            const val = valeurAvec(saisie, sys.table);
+            html += `
+                <p class="ligne">${escapeHtml(saisie)} in ${sys.nom} equals <b>${val}</b>:</p>
+                <p class="breakdown">${breakdown(saisie, sys.table)}</p>`;
+        }
+
+        // BIP39 detection: Alpha Code + sums before/after reduction to root
+        const motSimple = saisie.toLowerCase();
+        if (BIP39_EN_SET.has(motSimple)) {
+            const val = calculerValeurGematria(motSimple);
+            const { somme, expression } = calculerSommeChiffres(val);
+            const racine = racineNumerique(val);
+            const pastille = [3, 6, 9].includes(racine)
+                ? `<span class="pastille pastille-${racine}">${racine}</span>` : '';
+            html += `
+                <p class="ligne"><b>${escapeHtml(motSimple)}</b><span class="badge-bip39">BIP39</span> detected — Simple Gematria <b>${val}</b> → Alpha Code <b>${genererCodeAlpha(val)}</b></p>
+                <p class="ligne">Sum before root: <b>${expression}=${somme}</b> (letter <b>${sommeEnLettre(somme)}</b>) → root after reduction: <b>${racine}</b>${pastille}</p>`;
+        }
+
+        div.innerHTML = html;
+        ajouterAuTicker(saisie);
+    }
+
+    /* ================================================================
+       3×3 grid — 9 tables
+       ================================================================ */
+
+    function genererGrille() {
+        const debut = parseInt(document.getElementById('debut').value, 10);
+        const fin = parseInt(document.getElementById('fin').value, 10);
+        const grille = document.getElementById('grille');
+
+        if (!Number.isFinite(debut) || !Number.isFinite(fin) || debut > fin) {
+            grille.innerHTML = '<p>Please enter valid numbers.</p>';
+            return;
+        }
+
+        const taille = Math.ceil((fin - debut + 1) / 9);
+        grille.innerHTML = '';
+
+        for (let t = 0; t < 9; t++) {
+            const d = debut + t * taille;
+            const f = Math.min(fin, d + taille - 1);
+            if (d > f) break;
+
+            let rows = '';
+            for (let i = d; i <= f; i++) {
+                const { somme, expression } = calculerSommeChiffres(i);
+                const racine = racineNumerique(somme);
+                const pastille = [3, 6, 9].includes(racine)
+                    ? `<span class="pastille pastille-${racine}">${racine}</span> ` : '';
+                const softRow = (i % 10 === 9 || i % 10 === 0);
+
+                rows += `
+                    <tr class="${softRow ? 'row-soft' : ''}">
+                        <td>${escapeHtml(nombreEnLettres(i))}</td>
+                        <td>${i}</td>
+                        <td>${genererCodeAlpha(i)}</td>
+                        <td>${expression}=${somme}</td>
+                        <td>${pastille}${sommeEnLettre(somme)}</td>
+                    </tr>`;
+            }
+
+            const caseTab = document.createElement('div');
+            caseTab.className = 'case-tableau';
+            caseTab.innerHTML = `
+                <h3>Table ${t + 1} · ${d} → ${f}</h3>
+                <div class="scroll-zone">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Words</th>
+                                <th scope="col">Num</th>
+                                <th scope="col">Alpha</th>
+                                <th scope="col">Sum</th>
+                                <th scope="col">Letter</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>`;
+            grille.appendChild(caseTab);
+        }
+    }
+
+    /* ================================================================
+       BIP39 × Alpha Code — root vocabulary
+       For each BIP39 word: simple gematria value, its Alpha Code,
+       the digit sum BEFORE reduction ("nombre avant racine") and
+       the digital root AFTER reduction ("racine"). Words are grouped
+       into 9 vocabulary tables, one per root.
+       ================================================================ */
+
+    async function genererBip39Alpha() {
+        const conteneur = document.getElementById('bip39Groupes');
+        const stats = document.getElementById('bip39Stats');
+        const bankId = document.getElementById('bip39BankAlpha').value;
+        const filtre = parseInt(document.getElementById('filtreRacine').value, 10) || 0;
+        const bouton = document.getElementById('btnBip39Alpha');
+
+        bouton.disabled = true;
+        stats.textContent = 'Computing the root vocabulary…';
+
+        const banque = await chargerBanqueBIP39(bankId);
+
+        // Group every word by its digital root
+        const groupes = Array.from({ length: 9 }, () => []);
+        for (const w of banque) {
+            const { somme, expression } = calculerSommeChiffres(w.val);
+            const racine = racineNumerique(w.val);
+            groupes[racine - 1].push({
+                mot: w.mot,
+                val: w.val,
+                alpha: genererCodeAlpha(w.val),
+                sommeAvant: somme,
+                expression: expression,
+                racine: racine
+            });
+        }
+
+        const total = banque.length;
+        const distribution = groupes.map((g, i) => (i + 1) + ':' + g.length).join(' · ');
+
+        let html = '';
+        for (let r = 0; r < 9; r++) {
+            if (filtre !== 0 && filtre !== r + 1) continue;
+            const mots = groupes[r].sort((a, b) => a.val - b.val || a.mot.localeCompare(b.mot));
+            const racine = r + 1;
+            const pastille = [3, 6, 9].includes(racine)
+                ? `<span class="pastille pastille-${racine}">${racine}</span>` : '';
+
+            let rows = '';
+            for (const m of mots) {
+                rows += `
+                    <tr>
+                        <td>${escapeHtml(m.mot)}</td>
+                        <td>${m.val}</td>
+                        <td>${escapeHtml(m.alpha)}</td>
+                        <td>${m.expression}=${m.sommeAvant}</td>
+                        <td>${sommeEnLettre(m.sommeAvant)}</td>
+                        <td>${m.racine}</td>
+                    </tr>`;
+            }
+
+            html += `
+                <div class="case-tableau">
+                    <h3>Root ${racine} ${pastille} · ${mots.length} words</h3>
+                    <div class="scroll-zone">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Word</th>
+                                    <th scope="col">Value</th>
+                                    <th scope="col">Alpha</th>
+                                    <th scope="col">Sum (before root)</th>
+                                    <th scope="col">Letter</th>
+                                    <th scope="col">Root</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                </div>`;
+        }
+
+        conteneur.innerHTML = html || '<p>No word matches this root.</p>';
+        stats.textContent = `${total} words decoded in Alpha Code · distribution per root: ${distribution}` +
+            (filtre ? ` · showing root ${filtre} only.` : ' · showing all 9 roots.');
+        bouton.disabled = false;
+    }
+
+    /* ================================================================
+       Phrase generator (grammar-templated, exact sum)
+       ================================================================ */
+
+    function genererPhrasesAvecSommeEtStructure(somme, nbPhrases, bankId = 'mixed', bip39Bank = [], rng = Math.random, motsUtilises = null) {
+        const MAX_TENTATIVES = 3000;
+        const phrases = [];
+        const phrasesUniques = new Set();
+        const pools = getGenerationPools(bankId, bip39Bank);
+        const templates = templatesPourBanque(bankId);
+        const utilises = motsUtilises || new Set();
+
+        /** Pick a candidate while avoiding recently used words; when the
+            pool runs out of fresh words, reset the memory and start over.
+            Fresh words are weighted towards larger values so small filler
+            words do not always dominate the draw. */
+        const choisir = (candidats) => {
+            if (!candidats || candidats.length === 0) return null;
+            let frais = candidats.filter(w => !utilises.has(w.mot));
+            if (frais.length === 0) {
+                utilises.clear();
+                frais = candidats;
+            }
+            // keep only words whose value fits, with a random bias towards
+            // bigger candidates (fresher vocabulary, less repetition)
+            const trie = frais.slice().sort((a, b) => b.val - a.val);
+            const fenetre = trie.slice(0, Math.max(1, Math.ceil(trie.length * 0.6)));
+            const choisi = aleaSeeded(rng, fenetre);
+            utilises.add(choisi.mot);
+            return choisi;
+        };
+
+        for (let i = 0; i < MAX_TENTATIVES && phrasesUniques.size < nbPhrases; i++) {
+            const template = aleaSeeded(rng, templates);
+            const mots = [];
+            let sommeActuelle = 0;
+            let bloqué = false;
+
+            for (const slot of template) {
+                const source = slot === 'bip39' ? pools.bip39 : CATEGORIES[slot];
+                const candidats = (source || []).filter(w => w.val > 0 && w.val <= somme - sommeActuelle);
+                const choisi = choisir(candidats);
+                if (!choisi) { bloqué = true; break; }
+                mots.push(choisi.mot);
+                sommeActuelle += choisi.val;
+            }
+            if (bloqué) continue;
+
+            let garde = 40;
+            while (sommeActuelle < somme && garde-- > 0) {
+                const ecart = somme - sommeActuelle;
+                const remplissants = pools.remplissants.filter(w => w.val <= ecart);
+                const choisi = choisir(remplissants);
+                if (!choisi) break;
+                mots.push(choisi.mot);
+                sommeActuelle += choisi.val;
+            }
+
+            if (sommeActuelle < somme) {
+                const reste = somme - sommeActuelle;
+                if (reste <= 26) {
+                    const lettre = sommeEnLettre(reste);
+                    if (lettre !== "?") {
+                        const position = Math.floor(rng() * 3);
+                        if (position === 0) {
+                            mots.unshift(lettre);
+                        } else if (position === 1) {
+                            mots.splice(Math.floor(mots.length / 2), 0, lettre);
+                        } else {
+                            mots.push(lettre);
+                        }
+                        sommeActuelle += reste;
+                    }
+                }
+            }
+
+            if (sommeActuelle === somme) {
+                const phrase = mots.join(" ");
+                if (!phrasesUniques.has(phrase)) {
+                    phrasesUniques.add(phrase);
+                    phrases.push({ phrase, mots });
+                }
+            }
+        }
+
+        return phrases;
+    }
+
+    /* ================================================================
+       Corpus transformation
+       ================================================================ */
+
+    const TOKEN_MOT = /^[A-Za-zÀ-ÿ']+$/;
+
+    async function transformerCorpus() {
+        const corpus = document.getElementById('corpusInput').value;
+        const divResultat = document.getElementById('corpusResultat');
+        const stats = document.getElementById('corpusStats');
+        const loading = document.getElementById('loadingCorpus');
+        const bouton = document.getElementById('btnTransformer');
+        const sommeMin = parseInt(document.getElementById('sommeMin').value, 10) || 10;
+        const maxPhrases = Math.min(5, Math.max(1, parseInt(document.getElementById('maxPhrases').value, 10) || 1));
+        const bankId = document.getElementById('banqueMots')?.value || 'mixed';
+        let bip39Bank = [];
+        if (bankId !== 'builtin') {
+            bip39Bank = await chargerBanqueBIP39(bankId === 'mixed' ? 'bip39-en' : bankId);
+        } else {
+            setBankStatus('Built-in thematic banks active.');
+        }
+
+        if (!corpus.trim()) {
+            divResultat.textContent = "Please enter a corpus.";
+            return;
+        }
+
+        // Generation hash: reused verbatim if provided, freshly minted otherwise.
+        const champHash = document.getElementById('hashGen');
+        const hashSaisi = (champHash?.value || '').trim().toUpperCase();
+        const hash = hashSaisi || genererHash();
+        if (champHash) champHash.value = hash;
+        const rng = creerPRNG(hash);
+        const motsUtilises = new Set();
+
+        loading.style.display = 'inline-block';
+        bouton.disabled = true;
+        divResultat.textContent = "Transforming...";
+
+        setTimeout(() => {
+            const tokens = corpus.match(/[A-Za-zÀ-ÿ']+|[^\sA-Za-zÀ-ÿ']+/g) || [];
+            let html = '';
+            let nbMots = 0, nbRemplaces = 0, nbEchecs = 0;
+            const cache = new Map();
+
+            for (const token of tokens) {
+                if (!TOKEN_MOT.test(token)) {
+                    html += escapeHtml(token) + ' ';
+                    continue;
+                }
+
+                nbMots++;
+                const motPropre = token.replace(/^'+|'+$/g, '');
+                const gematria = calculerValeurGematria(motPropre);
+
+                if (gematria < sommeMin) {
+                    html += escapeHtml(token) + ' ';
+                    continue;
+                }
+
+                if (!cache.has(gematria)) {
+                    cache.set(gematria, genererPhrasesAvecSommeEtStructure(gematria, maxPhrases, bankId, bip39Bank, rng, motsUtilises));
+                }
+                const variantes = cache.get(gematria);
+                const phrase = variantes.length > 0 ? alea(variantes).phrase : null;
+
+                if (phrase) {
+                    nbRemplaces++;
+                    html += `<span class="mot-phrase">`
+                        + `<span class="somme-tag">[${gematria}]</span>`
+                        + `<span class="phrase-gen">${escapeHtml(phrase)}</span>`
+                        + `</span> `;
+                } else {
+                    nbEchecs++;
+                    html += `<span class="mot-phrase"><span class="somme-tag">[${gematria}]</span>`
+                        + `<span class="mot-origine">${escapeHtml(token)}</span>`
+                        + `<span class="mot-dots"> ✧(no phrase for ${gematria})</span></span> `;
+                }
+            }
+
+            divResultat.innerHTML = html.trim();
+            stats.innerHTML = `${nbMots} words detected · ${nbRemplaces} replaced by phrases (identical simple gematria) · ${nbEchecs} without a match.<br>` +
+                `Generation hash: <b>${escapeHtml(hash)}</b> — keep it to reproduce this exact result.`;
+            loading.style.display = 'none';
+            bouton.disabled = false;
+            document.getElementById('zoneShuffle').classList.add('visible');
+        }, 300);
+    }
+
+    function reinitialiser() {
+        document.getElementById('corpusInput').value = '';
+        document.getElementById('corpusResultat').textContent = "The result will be displayed here...";
+        document.getElementById('corpusStats').textContent = '';
+        document.getElementById('zoneShuffle').classList.remove('visible');
+    }
+
+    /* ================================================================
+       Copy result
+       ================================================================ */
+
+    function retoucherBouton(btn, message) {
+        const ico = btn.querySelector('.ico')?.outerHTML || '';
+        btn.textContent = message;
+        setTimeout(() => { btn.textContent = 'Copy the result'; }, 2000);
+    }
+
+    function copierParExecCommand(texte, reussite, echec) {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = texte;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            const ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            ok ? reussite() : echec();
+        } catch (e) {
+            echec();
+        }
+    }
+
+    function copierResultat() {
+        const divResultat = document.getElementById('corpusResultat');
+        const btn = document.getElementById('btnCopier');
+        const texte = divResultat.innerText.trim();
+
+        if (!texte || texte === "The result will be displayed here...") {
+            retoucherBouton(btn, "Nothing to copy");
+            return;
+        }
+
+        const reussite = () => retoucherBouton(btn, "Copied!");
+        const echec = () => retoucherBouton(btn, "Copy failed");
+
+        if (navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(texte).then(reussite).catch(() => {
+                copierParExecCommand(texte, reussite, echec);
+            });
+        } else {
+            copierParExecCommand(texte, reussite, echec);
+        }
+    }
+
+    /* ================================================================
+       Wiring
+       ================================================================ */
+
+    document.getElementById('btnCalculer').addEventListener('click', calculerMot);
+    document.getElementById('motRecherche').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') calculerMot();
+    });
+    document.getElementById('btnGrille').addEventListener('click', genererGrille);
+    document.getElementById('btnBip39Alpha').addEventListener('click', genererBip39Alpha);
+    document.getElementById('bip39BankAlpha').addEventListener('change', genererBip39Alpha);
+    document.getElementById('filtreRacine').addEventListener('change', genererBip39Alpha);
+    document.getElementById('btnTransformer').addEventListener('click', () => {
+        // A manual transform keeps the hash field: regenerate identically if
+        // one is present, mint a fresh one otherwise.
+        transformerCorpus();
+    });
+    document.getElementById('btnHash').addEventListener('click', transformerCorpus);
+    document.getElementById('btnNewHash').addEventListener('click', () => {
+        document.getElementById('hashGen').value = genererHash();
+        transformerCorpus();
+    });
+    document.getElementById('btnReinit').addEventListener('click', reinitialiser);
+    document.getElementById('btnCopier').addEventListener('click', copierResultat);
+    document.getElementById('btnShuffle').addEventListener('click', () => {
+        document.getElementById('hashGen').value = genererHash();
+        transformerCorpus();
+    });
+
+    window.addEventListener('load', () => {
+        genererGrille();
+        genererBip39Alpha();
+    });
+})();
+
+</script>
+
+</body>
+</html>
